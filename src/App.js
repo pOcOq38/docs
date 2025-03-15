@@ -60,22 +60,45 @@ function Board({xIsNext, squares, onPlay}){
 }
 
 export default function Game(){
-  const [xIsNext, setXIsNext] = useState(true);
+  //const [xIsNext, setXIsNext] = useState(true); //중복됨
   const [history, setHistory] = useState([Array(9).fill(null)]);
-  const currentSquares = history[history.length-1]; //가장 최근의 상태 배열
-  
-  function handlePlay(nextSquares){
-    setHistory([...history, nextSquares]); //...history(history의 모든 항목) + nextSquares
-    setXIsNext(!xIsNext);
+  const [currentMove, setCurrentMove] = useState(0);
+  const xIsNext = currentMove % 2 === 0;
+  //const currentSquares = history[history.length-1]; //가장 최근의 상태 배열
+  const currentSquares = history[currentMove];
 
+  function handlePlay(nextSquares){
+    const nextHistory = [...history.slice(0, currentMove + 1), nextSquares];
+    setHistory([...history, nextSquares]); //...history(history의 모든 항목) + nextSquares
+    setCurrentMove(nextHistory.length-1);
   }
+
+  function jumpTo(nextMove) {
+    setCurrentMove(nextMove);
+  }
+
+  const moves = history.map((squares, move) => {
+    let description;
+    if(move > 0){
+      description = 'Go to move #' + move;
+    } else {
+      description = 'Go to game start';
+    }
+    return (
+      <li key={move}>
+        <button onClick={() => jumpTo(move)}>{description}</button>
+      </li>
+
+    );
+  });
+
   return(
     <div className='game'>
       <div className='game-board'>
         <Board xIsNext={xIsNext} squares={currentSquares} onPlay={handlePlay}/>
       </div>
       <div className="game-info">
-        <ol>{/*TODO*/}</ol>
+        <ol>{moves}</ol>
       </div>
     </div>
   )
